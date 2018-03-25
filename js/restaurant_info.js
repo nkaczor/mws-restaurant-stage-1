@@ -20,6 +20,17 @@ window.initMap = () => {
   });
 }
 
+registerServiceWorker = function() {
+  if (!navigator.serviceWorker) return;
+
+  var indexController = this;
+  navigator.serviceWorker.register('../sw/index.js');
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+  registerServiceWorker();
+});
+
 /**
  * Get current restaurant from page URL.
  */
@@ -58,6 +69,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.alt = restaurant.name;
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
@@ -121,7 +133,7 @@ createReviewHTML = (review) => {
   name.innerHTML = review.name;
   li.appendChild(name);
 
-  const date = document.createElement('p');
+  const date = document.createElement('time');
   date.innerHTML = review.date;
   li.appendChild(date);
 
