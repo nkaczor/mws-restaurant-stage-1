@@ -20,17 +20,6 @@ window.initMap = () => {
   });
 }
 
-registerServiceWorker = function() {
-  if (!navigator.serviceWorker) return;
-
-  var indexController = this;
-  navigator.serviceWorker.register('../sw/index.js');
-}
-
-document.addEventListener('DOMContentLoaded', (event) => {
-  registerServiceWorker();
-});
-
 /**
  * Get current restaurant from page URL.
  */

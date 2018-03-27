@@ -7,18 +7,18 @@ var markers = []
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
+registerServiceWorker();
 document.addEventListener('DOMContentLoaded', (event) => {
-  registerServiceWorker();
   fetchNeighborhoods();
   fetchCuisines();
 });
 
-registerServiceWorker = function() {
+function registerServiceWorker() {
   if (!navigator.serviceWorker) return;
 
   var indexController = this;
 
-  navigator.serviceWorker.register('../sw/index.js');
+  navigator.serviceWorker.register('../sw.js');
 }
 /**
  * Fetch all neighborhoods and set their HTML.
@@ -152,7 +152,7 @@ createRestaurantHTML = (restaurant) => {
   image.alt = restaurant.name;
   li.append(image);
 
-  const name = document.createElement('h1');
+  const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
   li.append(name);
 
