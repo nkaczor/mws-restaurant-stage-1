@@ -4,7 +4,9 @@
 <head>
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="manifest" href="/app.webmanifest">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fdfdfd"/>
   <title>Restaurant Reviews</title>
 </head>
 
@@ -23,10 +25,10 @@
       <div class="filter-options-container">
         <div class="filter-options">
           <h2>Filter Results</h2>
-          <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()">
+          <select id="neighborhoods-select" name="neighborhoods" aria-label="Neigborhood" onchange="updateRestaurants()">
             <option value="all">All Neighborhoods</option>
           </select>
-          <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
+          <select id="cuisines-select" name="cuisines" aria-label="cuisine" onchange="updateRestaurants()">
             <option value="all">All Cuisines</option>
           </select>
         </div>
@@ -35,6 +37,7 @@
     </section>
   </main>
 
+  <script type="application/javascript" charset="utf-8" src="js/idb.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/main.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/sw_register.js"></script>

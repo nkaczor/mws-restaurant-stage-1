@@ -45,8 +45,8 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 }
 #footer {
   width: 100%;
-  background-color: #444;
-  color: #aaa;
+  background-color: rgb(46, 45, 45);
+  color: rgb(255, 253, 253);
   font-size: 8pt;
   letter-spacing: 1px;
   padding: 25px;
@@ -112,7 +112,7 @@ nav h1 a {
 .filter-options-container {
   padding: 10px;
   width: 100%;
-  background-color: #3397DB;
+  background-color: #1175B9;
   align-items: center;
 }
 .filter-options-container h2 {
@@ -185,7 +185,7 @@ nav h1 a {
   font-size: 11pt;
 }
 #restaurants-list li a {
-  background-color: orange;
+  background-color: rgb(119, 78, 3);
   border-bottom: 3px solid #eee;
   color: #fff;
   display: inline-block;

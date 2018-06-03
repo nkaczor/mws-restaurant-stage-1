@@ -3,59 +3,96 @@
  */
 class DBHelper {
 
-  /**
+  static openDatabase() {
+    return idb.open('restaurantDataBase', 1, (upgradeDb) => {
+      upgradeDb.createObjectStore('restaurantDataBase', {
+        keyPath: 'id'});
+    });
+  }
+
+  static saveDatabase(response) {
+    return DBHelper.openDatabase()
+      .then((db) => {
+        if (!db) return;
+        let tx = db.transaction('restaurantDataBase', 'readwrite');
+        let store = tx.objectStore('restaurantDataBase');
+        response.forEach((restaurant) => store.put(restaurant));
+        return tx.complete;
+      });
+  }
+
+  static getCachedRestaurants() {
+    return DBHelper.openDatabase().then((db) => {
+      if (!db) return;
+      let tx = db.transaction('restaurantDataBase');
+      let store = tx.objectStore('restaurantDataBase');
+      return store.getAll();
+    });
+  }
+
+ /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
    */
+
   static get DATABASE_URL() {
-    const port = 8000 // Change this to your server port
-    return `http://localhost:${port}/data/restaurants.json`;
+    const port = 1337 // Change this to your server port
+    return `http://localhost:${port}/restaurants`;
+  }
+
+  static fetchRestaurants() {
+    return fetch(DBHelper.DATABASE_URL)
+      .then(this.handleErrors)
+      .then(response => response.json())
+      .then(response => {
+        DBHelper.saveDatabase(response);
+        return response;
+      })
+  }
+
+  static handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
   }
 
   /**
    * Fetch all restaurants.
    */
-  static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json.restaurants;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
+  static getRestaurants(callback) {
+    return DBHelper.getCachedRestaurants()
+      .then((restaurants) => {
+        if (restaurants.length) {
+          return Promise.resolve(restaurants);
+        } else {
+          return this.fetchRestaurants();
+        }
+      })
+      .then(response =>
+        callback(null, response)
+      )
+      .catch((error) =>
+        callback(error, null)
+      );
   }
 
-  /**
-   * Fetch a restaurant by its ID.
-   */
-  static fetchRestaurantById(id, callback) {
-    // fetch all restaurants with proper error handling.
-    DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error) {
-        callback(error, null);
-      } else {
-        const restaurant = restaurants.find(r => r.id == id);
-        if (restaurant) { // Got the restaurant
-          callback(null, restaurant);
-        } else { // Restaurant does not exist in the database
-          callback('Restaurant does not exist', null);
-        }
+  static getRestaurantById(id, callback) {
+    return DBHelper.getRestaurants(((error, response) => {
+      if(error) {
+        return callback(error, null);
       }
-    });
+      const restaurant = response.find(el => el.id == id);
+      return callback(null, restaurant);
+    }))
   }
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
    */
-  static fetchRestaurantByCuisine(cuisine, callback) {
+  static getRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.getRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -69,9 +106,9 @@ class DBHelper {
   /**
    * Fetch restaurants by a neighborhood with proper error handling.
    */
-  static fetchRestaurantByNeighborhood(neighborhood, callback) {
+  static getRestaurantByNeighborhood(neighborhood, callback) {
     // Fetch all restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.getRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -85,9 +122,9 @@ class DBHelper {
   /**
    * Fetch restaurants by a cuisine and a neighborhood with proper error handling.
    */
-  static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
+  static getRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
     // Fetch all restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.getRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -106,9 +143,9 @@ class DBHelper {
   /**
    * Fetch all neighborhoods with proper error handling.
    */
-  static fetchNeighborhoods(callback) {
+  static getNeighborhoods(callback) {
     // Fetch all restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.getRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -124,9 +161,9 @@ class DBHelper {
   /**
    * Fetch all cuisines with proper error handling.
    */
-  static fetchCuisines(callback) {
+  static getCuisines(callback) {
     // Fetch all restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.getRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -150,7 +187,7 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}`);
+    return (`/img/${restaurant.photograph}.jpg`);
   }
 
   /**
