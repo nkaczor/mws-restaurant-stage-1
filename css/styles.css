@@ -29,7 +29,7 @@ a:hover, a:focus {
 	color: #3397db;
 	text-decoration: none;
 }
-a img{
+a picture{
 	border: none 0px #fff;
 }
 h1, h2, h3, h4, h5, h6 {
@@ -161,7 +161,7 @@ nav h1 a {
   max-width: 350px;
   text-align: left;
 }
-#restaurants-list .restaurant-img {
+#restaurants-list .restaurant-img > * {
   background-color: #ccc;
   display: block;
   margin: 0;

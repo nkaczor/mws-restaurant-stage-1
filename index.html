@@ -4,7 +4,7 @@
 <head>
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="manifest" href="/app.webmanifest">
+  <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fdfdfd"/>
   <title>Restaurant Reviews</title>
@@ -36,11 +36,11 @@
       <ul id="restaurants-list"></ul>
     </section>
   </main>
-
-  <script type="application/javascript" charset="utf-8" src="js/idb.js"></script>
-  <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
-  <script type="application/javascript" charset="utf-8" src="js/main.js"></script>
-  <script type="application/javascript" charset="utf-8" src="js/sw_register.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
+  <script async type="application/javascript" charset="utf-8" src="js/idb.js"></script>
+  <script async type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
+  <script async type="application/javascript" charset="utf-8" src="js/main.js"></script>
+  <script async type="application/javascript" charset="utf-8" src="js/sw_register.js"></script>
 
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCwvkiNDlxeqqT4u5qJLMsj2K0bk3x56F4&libraries=places&callback=initMap"></script>
 

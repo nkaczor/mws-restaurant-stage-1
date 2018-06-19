@@ -191,6 +191,13 @@ class DBHelper {
   }
 
   /**
+   * Restaurant image URL.
+   */
+  static webpImageUrlForRestaurant(restaurant) {
+    return (`/img/webp/${restaurant.photograph}.webp`);
+  }
+
+  /**
    * Map marker for a restaurant.
    */
   static mapMarkerForRestaurant(restaurant, map) {

@@ -138,11 +138,27 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
+  const observer = lozad('.lozad', {
+    loaded: function(el) {
+        // Custom implementation on a loaded element
+        el.querySelector('img').alt = el.getAttribute('data-alt')
+    }
+  });
+   // lazy loads elements with default selector as '.lozad'
+  observer.observe();
+
   if (restaurant.photograph) {
-    const image = document.createElement('img');
-    image.className = 'restaurant-img';
-    image.src = DBHelper.imageUrlForRestaurant(restaurant);
-    image.alt = restaurant.name;
+    const image = document.createElement('picture');
+    image.setAttribute('data-alt', restaurant.name);
+    image.setAttribute('data-iesrc', DBHelper.imageUrlForRestaurant(restaurant))
+    const webp_image = document.createElement('source');
+    const jpeg_image = document.createElement('source');
+    image.className = 'restaurant-img lozad';
+    webp_image.setAttribute('srcset', DBHelper.webpImageUrlForRestaurant(restaurant));
+    jpeg_image.setAttribute('srcset', DBHelper.imageUrlForRestaurant(restaurant));
+    image.append(webp_image);
+    image.append(jpeg_image);
+
     li.append(image);
   }
 
