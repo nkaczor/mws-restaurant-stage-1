@@ -69,21 +69,20 @@ self.addEventListener('sync', function (event) {
 						let store = tx.objectStore('reviews');
 						let request = store.add(data);
 						request.onsuccess = function (data) {
-							//TODO: add data (= one review) to view
 							let tx = db.transaction('offline-post', 'readwrite');
 							let store = tx.objectStore('offline-post');
 							let request = store.clear();
 							request.onsuccess = function () { };
-							request.onerror = function (error) {
-								console.log('Unable to clear offline-reviews objectStore', error);
+							request.onerror = function (e) {
+								console.log(e);
 							}
 						};
-						request.onerror = function (error) {
-							console.log('Unable to add objectStore to IDB', error);
+						request.onerror = function (e) {
+							console.log(e);
 						}
 					})
-					.catch(error => {
-						console.log('Unable to make a POST fetch', error);
+					.catch(function(e) {
+						console.log(e);
 					})
 				}
 			}
