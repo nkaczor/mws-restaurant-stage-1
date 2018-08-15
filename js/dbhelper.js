@@ -1,3 +1,5 @@
+const port = 1337
+
 /**
  * Common database helper functions.
  */
@@ -7,6 +9,10 @@ class DBHelper {
     return idb.open('restaurantDataBase', 1, (upgradeDb) => {
       upgradeDb.createObjectStore('restaurantDataBase', {
         keyPath: 'id'});
+      upgradeDb.createObjectStore('reviews', {
+        keyPath: 'id'})
+      upgradeDb.createObjectStore('offline-post', {
+        keyPath: 'createdAt'})
     });
   }
 
@@ -35,13 +41,18 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
 
-  static get DATABASE_URL() {
+  static get RESTAURANTS_URL() {
     const port = 1337 // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
 
+  static get REVIEWS_URL() {
+     // Change this to your server port
+    return `http://localhost:${port}/reviews`;
+  }
+
   static fetchRestaurants() {
-    return fetch(DBHelper.DATABASE_URL)
+    return fetch(DBHelper.RESTAURANTS_URL)
       .then(this.handleErrors)
       .then(response => response.json())
       .then(response => {
@@ -77,6 +88,8 @@ class DBHelper {
       );
   }
 
+
+
   static getRestaurantById(id, callback) {
     return DBHelper.getRestaurants(((error, response) => {
       if(error) {
@@ -86,6 +99,40 @@ class DBHelper {
       return callback(null, restaurant);
     }))
   }
+
+  static getCachedReviews() {
+    return DBHelper.openDatabase().then(db => {
+			if (!db) return;
+			const tx = db.transaction('reviews');
+			const store = tx.objectStore('reviews');
+      return store.getAll()
+    });
+  }
+
+  static getReviewsById(id) {
+    return DBHelper.getCachedReviews().then(results => {
+				if (results && results.length) {
+					return results;
+				} else {
+					return fetch(DBHelper.REVIEWS_URL + '/?restaurant_id=' + id)
+            .then(response => {
+              return response.json();
+            })
+            .then(reviews => {
+              DBHelper.openDatabase().then(db => {
+                if (!db) return;
+                const tx = db.transaction('reviews', 'readwrite');
+                const store = tx.objectStore('reviews');
+                reviews.forEach(review => {
+                  store.put(review);
+                })
+              });
+              return reviews;
+            })
+				}
+			})
+  }
+
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
@@ -137,6 +184,36 @@ class DBHelper {
         }
         callback(null, results);
       }
+    });
+  }
+
+  static postReview(review) {
+    return fetch(DBHelper.REVIEWS_URL, {
+      method: "POST",
+      body: JSON.stringify(review)
+    })
+    .then(response => response.json())
+    .then(data => {
+      DBHelper.openDatabase().then(db => {
+          if (!db) return;
+          const tx = db.transaction('reviews', 'readwrite');
+          const store = tx.objectStore('reviews');
+          store.put(data);
+        });
+        return data;
+      })
+    .catch(() => {
+      const reviewToSave = {
+        ...review,
+        ['createdAt']: new Date().getTime()
+      };
+      DBHelper.openDatabase().then(db => {
+        if (!db) return;
+        const tx = db.transaction('offline-post', 'readwrite');
+        const store = tx.objectStore('offline-post');
+        store.put(reviewToSave);
+      });
+      return;
     });
   }
 
@@ -200,14 +277,12 @@ class DBHelper {
   /**
    * Map marker for a restaurant.
    */
-  static mapMarkerForRestaurant(restaurant, map) {
-    const marker = new google.maps.Marker({
+  static mapMarkerForRestaurant(restaurant) {
+    const marker = {
       position: restaurant.latlng,
       title: restaurant.name,
       url: DBHelper.urlForRestaurant(restaurant),
-      map: map,
-      animation: google.maps.Animation.DROP}
-    );
+    };
     return marker;
   }
 

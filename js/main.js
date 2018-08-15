@@ -4,13 +4,6 @@ let restaurants,
 var map
 var markers = []
 
-/**
- * Fetch neighborhoods and cuisines as soon as the page is loaded.
- */
-document.addEventListener('DOMContentLoaded', (event) => {
-  fetchNeighborhoods();
-  fetchCuisines();
-});
 
 /**
  * Fetch all neighborhoods and set their HTML.
@@ -67,19 +60,18 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
   });
 }
 
-/**
- * Initialize Google map, called from HTML.
- */
-window.initMap = () => {
-  let loc = {
-    lat: 40.722216,
-    lng: -73.987501
-  };
-  self.map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 12,
-    center: loc,
-    scrollwheel: false
-  });
+initMap = () => {
+  let loc = [
+    40.722216,
+    -73.987501
+  ];
+
+  self.map = L.map('map').setView(loc, 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(self.map);
+
   updateRestaurants();
 }
 
@@ -116,8 +108,7 @@ resetRestaurants = (restaurants) => {
   ul.innerHTML = '';
 
   // Remove all map markers
-  self.markers.forEach(m => m.setMap(null));
-  self.markers = [];
+  //TODO delete all markers
   self.restaurants = restaurants;
 }
 
@@ -189,10 +180,30 @@ createRestaurantHTML = (restaurant) => {
 addMarkersToMap = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     // Add marker to the map
-    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
-    google.maps.event.addListener(marker, 'click', () => {
-      window.location.href = marker.url
-    });
-    self.markers.push(marker);
+    const marker = DBHelper.mapMarkerForRestaurant(restaurant);
+    L.marker([marker.position.lat, marker.position.lng])
+    .addTo(self.map)
+    .on('click', () => {
+        window.location.href = marker.url
+      });
+
+    // google.maps.event.addListener(marker, 'click', () => {
+    //   window.location.href = marker.url
+    // });
   });
+}
+
+load = () => {
+  fetchNeighborhoods();
+  fetchCuisines();
+  initMap();
+};
+
+/**
+ * Fetch neighborhoods and cuisines as soon as the page is loaded.
+ */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', load); // Document still loading so DomContentLoaded can still fire :)
+} else {
+  load();
 }

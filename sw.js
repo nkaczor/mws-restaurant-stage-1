@@ -45,6 +45,58 @@ self.addEventListener('fetch', function(event) {
   }
 });
 
+
+self.addEventListener('sync', function (event) {
+	if (event.tag == 'reviews_sync') {
+		const DBOpenRequest = indexedDB.open('restaurantDataBase', 1, function (upgradeDb) {
+      upgradeDb.createObjectStore('reviews', { keyPath: 'id' });
+      upgradeDb.createObjectStore('offline-post', { keyPath: 'createdAt' });
+    });
+		DBOpenRequest.onsuccess = function (e) {
+      db = DBOpenRequest.result;
+      let tx = db.transaction('offline-post', 'readwrite');
+      let store = tx.objectStore('offline-post');
+			let request = store.getAll();
+			request.onsuccess = function () {
+				for (let i = 0; i < request.result.length; i++) {
+					fetch(`http://localhost:1337/reviews/`, {
+						body: JSON.stringify(request.result[i]),
+						method: 'POST',
+					})
+					.then(response => response.json())
+					.then(data => {
+						let tx = db.transaction('reviews', 'readwrite');
+						let store = tx.objectStore('reviews');
+						let request = store.add(data);
+						request.onsuccess = function (data) {
+							//TODO: add data (= one review) to view
+							let tx = db.transaction('offline-post', 'readwrite');
+							let store = tx.objectStore('offline-post');
+							let request = store.clear();
+							request.onsuccess = function () { };
+							request.onerror = function (error) {
+								console.log('Unable to clear offline-reviews objectStore', error);
+							}
+						};
+						request.onerror = function (error) {
+							console.log('Unable to add objectStore to IDB', error);
+						}
+					})
+					.catch(error => {
+						console.log('Unable to make a POST fetch', error);
+					})
+				}
+			}
+			request.onerror = function (e) {
+				console.log(e);
+			}
+		}
+		DBOpenRequest.onerror = function (e) {
+			console.log(e);
+		}
+	}
+});
+
 self.addEventListener('activate', function(event) {
   console.log('Activating new service worker...');
 

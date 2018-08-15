@@ -1,21 +1,20 @@
 let restaurant;
 var map;
 
-/**
- * Initialize Google map, called from HTML.
- */
-window.initMap = () => {
+initMap = () => {
   getRestaurantFromURL((error, restaurant) => {
     if (error) { // Got an error!
       console.error(error);
     } else {
-      self.map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-        center: restaurant.latlng,
-        scrollwheel: false
-      });
+      let loc = [restaurant.latlng.lat, restaurant.latlng.lng]
+      self.map = L.map('map', {zoomControl: false}).setView(loc, 16);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(self.map);
       fillBreadcrumb();
-      DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+      const marker = DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+      L.marker([marker.position.lat, marker.position.lng])
+      .addTo(self.map)
     }
   });
 }
@@ -42,6 +41,14 @@ getRestaurantFromURL = (callback) => {
       fillRestaurantHTML();
       callback(null, restaurant)
     });
+
+    DBHelper.getReviewsById(id).then((reviews) => {
+      if (!reviews) {
+        console.error("error");
+        return;
+      }
+      fillReviewsHTML(reviews);
+    })
   }
 }
 
@@ -67,8 +74,6 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
-  fillReviewsHTML();
 }
 
 /**
@@ -123,7 +128,7 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('time');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.createdAt);
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -161,4 +166,39 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+const element = document.querySelector('#review-form');
+element.addEventListener('submit', event => {
+  event.preventDefault();
+
+  const review = {
+    restaurant_id: getParameterByName('id'),
+    name: document.getElementById('name').value,
+    rating: document.getElementById('rating').value,
+    comments: document.getElementById('comments').value,
+    date: new Date()
+  };
+
+  document.getElementById('name').value = '';
+  document.getElementById('rating').value = null;
+  document.getElementById('comments').value = '';
+
+  DBHelper.postReview(review);
+  const ul = document.getElementById('reviews-list');
+  ul.appendChild(createReviewHTML(review));
+});
+
+
+load = () => {
+  initMap();
+};
+
+/**
+ * Fetch neighborhoods and cuisines as soon as the page is loaded.
+ */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', load); // Document still loading so DomContentLoaded can still fire :)
+} else {
+  load();
 }

@@ -1,8 +1,11 @@
 registerServiceWorker = function() {
   if (!navigator.serviceWorker) return;
 
-  var indexController = this;
   navigator.serviceWorker.register('../sw.js');
+
+  navigator.serviceWorker.ready.then(function(swRegistration) {
+    return swRegistration.sync.register('reviews_sync');
+  });
 }
 
 registerServiceWorker();

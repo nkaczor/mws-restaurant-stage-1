@@ -309,3 +309,7 @@ nav h1 a {
   max-width: 1170px;
   margin: 0 auto;
 }
+
+.input-with-label > * {
+  display: block;
+}
