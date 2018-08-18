@@ -88,7 +88,21 @@ class DBHelper {
       );
   }
 
-
+  static favourite(id, value) {
+    return fetch(`${DBHelper.RESTAURANTS_URL}/${id}/?is_favourite=${value}` , {
+      method: "PUT"
+    })
+    .then(data => data.json())
+    .then(data => {
+      return DBHelper.openDatabase().then(db => {
+        if (!db) return;
+        const tx = db.transaction('reviews', 'readwrite');
+        const store = tx.objectStore('reviews');
+        store.put(data)
+        return data;
+      });
+    })
+  }
 
   static getRestaurantById(id, callback) {
     return DBHelper.getRestaurants(((error, response) => {
