@@ -114,17 +114,17 @@ class DBHelper {
     }))
   }
 
-  static getCachedReviews() {
+  static getCachedReviews(id) {
     return DBHelper.openDatabase().then(db => {
 			if (!db) return;
 			const tx = db.transaction('reviews');
 			const store = tx.objectStore('reviews');
-      return store.getAll()
+      return store.getAll().then(result => result.filter(el => el.id === id))
     });
   }
 
   static getReviewsById(id) {
-    return DBHelper.getCachedReviews().then(results => {
+    return DBHelper.getCachedReviews(id).then(results => {
 				if (results && results.length) {
 					return results;
 				} else {

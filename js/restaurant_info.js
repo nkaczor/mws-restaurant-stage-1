@@ -70,8 +70,6 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
 
-  console.log(restaurant)
-
   const fav = document.getElementById('restaurant-add-to-favourite');
   fav.innerHTML = !restaurant.is_favourite ? 'Add to favourite' : 'Delete from favourite';
 
