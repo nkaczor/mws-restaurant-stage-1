@@ -71,13 +71,14 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   cuisine.innerHTML = restaurant.cuisine_type;
 
   const fav = document.getElementById('restaurant-add-to-favourite');
-  fav.innerHTML = !restaurant.is_favourite ? 'Add to favourite' : 'Delete from favourite';
+  fav.innerHTML = restaurant.is_favorite === 'false' ? 'Add to favourite' : 'Delete from favourite';
 
   fav.addEventListener('click', event => {
     event.preventDefault();
-    DBHelper.favourite(restaurant.id, !restaurant.is_favourite).then(() => {
-      restaurant.is_favourite = !restaurant.is_favourite;
-      fav.innerHTML = !restaurant.is_favourite ? 'Add to favourite' : 'Delete from favourite'
+    console.log(restaurant.is_favorite, !restaurant.is_favorite)
+    DBHelper.favourite(restaurant.id, restaurant.is_favorite === 'true' ? 'false' : 'true').then((data) => {
+      restaurant = data;
+      fav.innerHTML = restaurant.is_favorite === 'false' ? 'Add to favourite' : 'Delete from favourite'
     });
   });
 

@@ -89,15 +89,16 @@ class DBHelper {
   }
 
   static favourite(id, value) {
-    return fetch(`${DBHelper.RESTAURANTS_URL}/${id}/?is_favourite=${value}` , {
+    return fetch(`${DBHelper.RESTAURANTS_URL}/${id}/?is_favorite=${value}` , {
       method: "PUT"
     })
     .then(data => data.json())
     .then(data => {
+      console.log(data);
       return DBHelper.openDatabase().then(db => {
         if (!db) return;
-        const tx = db.transaction('reviews', 'readwrite');
-        const store = tx.objectStore('reviews');
+        const tx = db.transaction('restaurantDataBase', 'readwrite');
+        const store = tx.objectStore('restaurantDataBase');
         store.put(data)
         return data;
       });
@@ -119,7 +120,7 @@ class DBHelper {
 			if (!db) return;
 			const tx = db.transaction('reviews');
 			const store = tx.objectStore('reviews');
-      return store.getAll().then(result => result.filter(el => el.id === id))
+      return store.getAll().then(result => result.filter(el => el.restaurant_id == id))
     });
   }
 
